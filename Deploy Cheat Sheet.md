@@ -13,6 +13,11 @@ docker build \
 ```
 
 ```
+docker tag semesta_library:latest nurhabib12/semesta_library:latest
+docker push nurhabib12/semesta_library:latest
+```
+
+```
 sed -i 's|frappe/erpnext:v15.72.3|semesta_library:latest|g' pwd.yml
 sed -i 's|semesta_library:latest|frappe/erpnext:v15.70.2|g' pwd.yml
 sed -i 's|--install-app erpnext|--install-app library_core|g' pwd.yml
