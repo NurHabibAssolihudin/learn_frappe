@@ -1,0 +1,384 @@
+```
+fullnameOverride: ''
+image:
+  pullPolicy: IfNotPresent
+  repository: nurhabib12/semesta_library
+  tag: latest
+imagePullSecrets: []
+ingress:
+  annotations: {}
+  enabled: false
+  hosts:
+    - host: erp.cluster.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+jobs:
+  backup:
+    affinity: {}
+    backoffLimit: 0
+    enabled: false
+    nodeSelector: {}
+    resources: {}
+    siteName: frontend
+    tolerations: []
+    withFiles: true
+  configure:
+    affinity: {}
+    args: []
+    backoffLimit: 0
+    command: []
+    enabled: true
+    envVars: []
+    fixVolume: true
+    nodeSelector: {}
+    resources: {}
+    tolerations: []
+  createSite:
+    adminExistingSecret: ''
+    adminExistingSecretKey: password
+    adminPassword: admin
+    affinity: {}
+    backoffLimit: 0
+    dbType: mariadb
+    enabled: true
+    forceCreate: false
+    installApps:
+      - erpnext
+      - library_core
+      - erp_semesta_core
+    nodeSelector: {}
+    resources: {}
+    siteName: frontend
+    tolerations: []
+  custom:
+    affinity: {}
+    backoffLimit: 0
+    containers: []
+    enabled: false
+    initContainers: []
+    jobName: ''
+    labels: {}
+    nodeSelector: {}
+    restartPolicy: Never
+    tolerations: []
+    volumes: []
+  dropSite:
+    affinity: {}
+    backoffLimit: 0
+    enabled: false
+    forced: false
+    nodeSelector: {}
+    resources: {}
+    siteName: frontend
+    tolerations: []
+  migrate:
+    affinity: {}
+    backoffLimit: 0
+    enabled: false
+    nodeSelector: {}
+    resources: {}
+    siteName: frontend
+    skipFailing: false
+    tolerations: []
+  volumePermissions:
+    affinity: {}
+    backoffLimit: 0
+    enabled: false
+    nodeSelector: {}
+    resources: {}
+    tolerations: []
+mariadb:
+  auth:
+    password: admin
+    replicationPassword: admin
+    rootPassword: admin
+    username: erpnext
+  enabled: true
+  primary:
+    extraFlags: >-
+      --skip-character-set-client-handshake --skip-innodb-read-only-compressed
+      --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    persistence:
+      enabled: false
+    service:
+      ports:
+        mysql: 3306
+nameOverride: ''
+nginx:
+  affinity: {}
+  autoscaling:
+    enabled: false
+    maxReplicas: 3
+    minReplicas: 1
+    targetCPU: 75
+    targetMemory: 75
+  defaultTopologySpread:
+    maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: DoNotSchedule
+  envVars: []
+  environment:
+    clientMaxBodySize: 50m
+    frappeSiteNameHeader: frontend
+    proxyReadTimeout: '120'
+    upstreamRealIPAddress: 127.0.0.1
+    upstreamRealIPHeader: X-Forwarded-For
+    upstreamRealIPRecursive: 'off'
+  initContainers: []
+  livenessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    tcpSocket:
+      port: 8080
+  nodeSelector: {}
+  readinessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    tcpSocket:
+      port: 8080
+  replicaCount: 1
+  resources: {}
+  service:
+    port: 8080
+    type: ClusterIP
+  sidecars: []
+  tolerations: []
+persistence:
+  logs:
+    accessModes:
+      - ReadWriteMany
+    enabled: false
+    size: 8Gi
+  worker:
+    accessModes:
+      - ReadWriteMany
+    enabled: true
+    size: 8Gi
+    storageClass: "longhorn"
+podSecurityContext:
+  supplementalGroups:
+    - 1000
+postgresql:
+  auth:
+    postgresPassword: changeit
+    username: postgres
+  enabled: false
+  primary:
+    service:
+      ports:
+        postgresql: 5432
+redis-cache:
+  architecture: standalone
+  auth:
+    enabled: false
+    sentinel: false
+  enabled: true
+  master:
+    containerPorts:
+      redis: 6379
+    persistence:
+      enabled: false
+redis-queue:
+  architecture: standalone
+  auth:
+    enabled: false
+    sentinel: false
+  enabled: true
+  master:
+    containerPorts:
+      redis: 6379
+    persistence:
+      enabled: false
+securityContext:
+  capabilities:
+    add:
+      - CAP_CHOWN
+serviceAccount:
+  create: true
+socketio:
+  affinity: {}
+  autoscaling:
+    enabled: false
+    maxReplicas: 3
+    minReplicas: 1
+    targetCPU: 75
+    targetMemory: 75
+  envVars: 
+    - name: REDIS_CACHE
+      value: redis://semesta-library-redis-cache-master:6379
+    - name: REDIS_QUEUE
+      value: redis://semesta-library-redis-queue-master:6379
+  initContainers: []
+  livenessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    tcpSocket:
+      port: 9000
+  nodeSelector: {}
+  readinessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    tcpSocket:
+      port: 9000
+  replicaCount: 1
+  resources: {}
+  service:
+    port: 9000
+    type: ClusterIP
+  sidecars: []
+  tolerations: []
+worker:
+  default:
+    affinity: {}
+    autoscaling:
+      enabled: false
+      maxReplicas: 3
+      minReplicas: 1
+      targetCPU: 75
+      targetMemory: 75
+    envVars: 
+      - name: REDIS_CACHE
+        value: redis://semesta-library-redis-cache-master:6379
+      - name: REDIS_QUEUE
+        value: redis://semesta-library-redis-queue-master:6379
+    initContainers: []
+    livenessProbe:
+      override: false
+      probe: {}
+    nodeSelector: {}
+    readinessProbe:
+      override: false
+      probe: {}
+    replicaCount: 1
+    resources: {}
+    sidecars: []
+    tolerations: []
+  defaultTopologySpread:
+    maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: DoNotSchedule
+  gunicorn:
+    affinity: {}
+    args: []
+    autoscaling:
+      enabled: false
+      maxReplicas: 3
+      minReplicas: 1
+      targetCPU: 75
+      targetMemory: 75
+    envVars: []
+    initContainers: []
+    livenessProbe:
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      tcpSocket:
+        port: 8000
+    nodeSelector: {}
+    readinessProbe:
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      tcpSocket:
+        port: 8000
+    replicaCount: 1
+    resources: {}
+    service:
+      port: 8000
+      type: ClusterIP
+    sidecars: []
+    tolerations: []
+  healthProbe: |
+    exec:
+      command:
+        - bash
+        - -c
+        - echo "Ping backing services";
+        {{- if .Values.mariadb.enabled }}
+        {{- if eq .Values.mariadb.architecture "replication" }}
+        - wait-for-it {{ .Release.Name }}-mariadb-primary:{{ .Values.mariadb.primary.service.ports.mysql }} -t 1;
+        {{- else }}
+        - wait-for-it {{ .Release.Name }}-mariadb:{{ .Values.mariadb.primary.service.ports.mysql }} -t 1;
+        {{- end }}
+        {{- else if .Values.dbHost }}
+        - wait-for-it {{ .Values.dbHost }}:{{ .Values.mariadb.primary.service.ports.mysql }} -t 1;
+        {{- end }}
+        {{- if index .Values "redis-cache" "host" }}
+        - wait-for-it {{ .Release.Name }}-redis-cache-master:{{ index .Values "redis-cache" "master" "containerPorts" "redis" }} -t 1;
+        {{- else if index .Values "redis-cache" "host" }}
+        - wait-for-it {{ index .Values "redis-cache" "host" }} -t 1;
+        {{- end }}
+        {{- if index .Values "redis-queue" "host" }}
+        - wait-for-it {{ .Release.Name }}-redis-queue-master:{{ index .Values "redis-queue" "master" "containerPorts" "redis" }} -t 1;
+        {{- else if index .Values "redis-queue" "host" }}
+        - wait-for-it {{ index .Values "redis-queue" "host" }} -t 1;
+        {{- end }}
+        {{- if .Values.postgresql.host }}
+        - wait-for-it {{ .Values.postgresql.host }}:{{ .Values.postgresql.primary.service.ports.postgresql }} -t 1;
+        {{- else if .Values.postgresql.enabled }}
+        - wait-for-it {{ .Release.Name }}-postgresql:{{ .Values.postgresql.primary.service.ports.postgresql }} -t 1;
+        {{- end }}
+    initialDelaySeconds: 15
+    periodSeconds: 5
+  long:
+    affinity: {}
+    autoscaling:
+      enabled: false
+      maxReplicas: 3
+      minReplicas: 1
+      targetCPU: 75
+      targetMemory: 75
+    envVars: []
+    initContainers: []
+    livenessProbe:
+      override: false
+      probe: {}
+    nodeSelector: {}
+    readinessProbe:
+      override: false
+      probe: {}
+    replicaCount: 1
+    resources: {}
+    sidecars: []
+    tolerations: []
+  scheduler:
+    affinity: {}
+    envVars: 
+      - name: REDIS_CACHE
+        value: redis://semesta-library-redis-cache-master:6379
+      - name: REDIS_QUEUE
+        value: redis://semesta-library-redis-queue-master:6379
+    initContainers: []
+    livenessProbe:
+      override: false
+      probe: {}
+    nodeSelector: {}
+    readinessProbe:
+      override: false
+      probe: {}
+    replicaCount: 1
+    resources: {}
+    sidecars: []
+    tolerations: []
+  short:
+    affinity: {}
+    autoscaling:
+      enabled: false
+      maxReplicas: 3
+      minReplicas: 1
+      targetCPU: 75
+      targetMemory: 75
+    envVars: []
+    initContainers: []
+    livenessProbe:
+      override: false
+      probe: {}
+    nodeSelector: {}
+    readinessProbe:
+      override: false
+      probe: {}
+    replicaCount: 1
+    resources: {}
+    sidecars: []
+    tolerations: []
+```
